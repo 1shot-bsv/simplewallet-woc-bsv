@@ -1,0 +1,449 @@
+#:import RiseInTransition kivy.uix.screenmanager.FadeTransition
+#:import Clipboard kivy.core.clipboard.Clipboard
+#:import Factory kivy.factory.Factory
+#:import MyZBarCam myzbarcam
+#:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
+RelativeLayout:
+    size_hint: (1,1)
+    pos_hint: {'x': 0, 'y': 0}
+    MainScreenManage:
+        id: main_sm
+
+<MainScreenManage>:
+    transition: RiseInTransition()
+    MainScreen:
+        id: Main_Screen
+        name: 'MainScreen'
+        manager: 'screen_manager'
+    ScanScreen:
+        id: Scan_Screen
+        name: 'ScanScreen'
+        manager: 'screen_manager'
+
+
+<MainScreen>:
+    RelativeLayout:
+        RelativeLayout:
+            size_hint: (1,0.9)
+            pos_hint: {'x': 0, 'y': 0}
+            ScreenManager:
+                id: sm
+        
+        BoxLayout:
+            size_hint: (1,0.1)
+            pos_hint: {'x': 0, 'y': 0.9}
+            Button:
+                id: history_button
+                text: 'History'
+                color: 0,0,0,1
+                background_color: (0,200,255,0.9)
+                on_press: 
+                    root.ids.sm.current = 'HistoryScreen'
+                    self.background_color = (0,200,255,0.9)
+                    root.ids.recieve_button.background_color = [1, 1, 1, 1]
+                    root.ids.pay_button.background_color = [1, 1, 1, 1]
+                    
+            Button:
+                id: recieve_button
+                text: 'Recieve'
+                color: 0,0,0,1
+                background_color: [1, 1, 1, 1]
+                on_press: 
+                    root.ids.sm.current = 'RecieveScreen'
+                    self.background_color = (0,200,255,0.9)
+                    root.ids.history_button.background_color = [1, 1, 1, 1]
+                    root.ids.pay_button.background_color = [1, 1, 1, 1]
+                    
+                    
+            
+            Button:
+                id: pay_button
+                text: 'Pay'
+                color: 0,0,0,1
+                background_color: [1, 1, 1, 1]
+                on_press: 
+                    root.ids.sm.current = 'PayScreen'
+                    self.background_color = (0,200,255,0.9)
+                    root.ids.history_button.background_color = [1, 1, 1, 1]
+                    root.ids.recieve_button.background_color = [1, 1, 1, 1]
+                
+    
+        
+<ScreenManager>:
+    
+    transition: RiseInTransition()
+    HistoryScreen:
+        id: History_Screen
+        name: 'HistoryScreen'
+        manager: 'screen_manager'
+    RecieveScreen:
+        id: Recieve_Screen
+        name: 'RecieveScreen'
+        manager: 'screen_manager'
+    PayScreen:
+        id: Pay_Screen
+        name: 'PayScreen'
+        manager: 'screen_manager'
+    QRAddressScreen:
+        id: QRAddress_Screen
+        name: 'QRAddressScreen'
+        manager: 'screen_manager'
+    AddressListScreen:
+        id: AddressList_Screen
+        name: 'AddressListScreen'
+        manager: 'screen_manager'
+
+
+
+<RecieveScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        RelativeLayout:
+            pos_hint: {'center_x': 0.5, 'y': 0.5}
+            
+            Button:
+                size_hint: (0.309,0.191)
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                text: 'Show QR address'
+                on_press:
+                    app.root.ids.main_sm.ids.Main_Screen.ids.sm.current = 'QRAddressScreen'
+                    app.root.ids.main_sm.ids.Main_Screen.ids.sm.ids.QRAddress_Screen.address = app.root.ids.main_sm.ids.Main_Screen.ids.sm.ids.QRAddress_Screen.get_recieve_address()
+                    app.root.ids.main_sm.ids.Main_Screen.ids.sm.ids.QRAddress_Screen.ids.qr.data = app.root.ids.main_sm.ids.Main_Screen.ids.sm.ids.QRAddress_Screen.address
+                    app.root.ids.main_sm.ids.Main_Screen.ids.sm.ids.QRAddress_Screen.ids.recieve_address.text = app.root.ids.main_sm.ids.Main_Screen.ids.sm.ids.QRAddress_Screen.address
+        RelativeLayout:
+            pos_hint: {'center_x': 0.5, 'y': 0}
+            
+            Button:
+                size_hint: (0.309,0.191)
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                text: 'Scan QR to get paid'
+                on_press:
+                    app.root.ids.main_sm.current = 'ScanScreen'
+                    app.root.ids.main_sm.ids.Scan_Screen.ids.zbarcam.start()
+                    
+                    
+                
+
+
+            
+
+
+<QRAddressScreen>:
+    RelativeLayout:
+        size_hint: (0.1,0.1)
+        pos_hint: {'x':0, 'y': 0.9}
+        Button:
+            text: 'back'
+            on_press:
+                app.root.ids.main_sm.ids.Main_Screen.ids.sm.current = 'RecieveScreen'
+                
+                
+    RelativeLayout:
+        size_hint: (0.618,None)
+        size: self.width, self.width
+        pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+        QRCodeWidget:
+            id: qr
+            data: root.address
+    RelativeLayout:
+        size_hint: (1,0.1)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+        Button:
+            id: recieve_address
+            text: root.address
+            background_color: [0, 0, 0, 0]
+            on_press: 
+                Clipboard.copy(self.text)
+                Factory.MyPopup().open()
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: (1,0.1)
+        pos_hint: {'center_x':0.5, 'y': 0}
+        Button:
+            text: 'New Address'
+            on_press: root.get_new_address()
+    
+        Button:
+            text: 'Confirm'
+            on_press: root.confirm_button()
+        Button:
+            text: 'Address List'
+            on_press: 
+                app.root.ids.main_sm.ids.Main_Screen.ids.sm.current = 'AddressListScreen'
+                
+
+
+
+
+<HistoryScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (1,0.1)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+            Button:
+                id: balance
+                text: 'Balance: '+str(root.balance) +' sats   (TOUCH TO REFRESH)'
+                background_color: [0,0,0,0]
+                on_press: root.update_balance()
+            
+        ScrollView:
+            scroll_type: ['bars', 'content']
+            bar_color: [.7, .7, .7, .9]
+            bar_inactive_color:  [.7, .7, .7, .2]
+            do_scroll_x: True
+            do_scroll_y: True
+            
+            
+            HistoryView:
+                id: history_view
+                height: self.minimum_height
+                size_hint_y: None
+                row_default_height: 100
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (1,0.1)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+            Button:
+                text: 'QUIT'
+                on_press: app.get_running_app().stop()
+            Button:
+                text: 'UPDATE LIST'
+                on_press: root.ids.history_view.update_list()
+                
+<PayScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        
+            
+        RelativeLayout:
+            
+            BoxLayout:
+                size_hint: (1,0.5)
+                pos_hint: {'center_x': 0.5, 'center_y': 0.75}
+                orientation: 'horizontal'
+                RelativeLayout:
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'y': 0.75}
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_x: 0.45
+                        Label:
+                            text: 'Pay to Address'
+                            size_hint_x: 0.1
+                        BoxLayout:
+                            size_hint_x: 0.45
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'y': 0.5}
+                        orientation: 'horizontal'
+                    
+                        
+                        Label:
+                            text: 'Address:'
+                            size_hint_x: 0.2
+                        
+                        TextInput:
+                            id: pay_address
+                            size_hint_x: 0.5
+                            pos_hint: {'center_x': 0.5}
+                            text: 
+                            focus: False
+                            use_bubble: True
+
+                        
+                        Button:
+                            text: 'Paste'
+                            size_hint_x: 0.15
+                            on_press:
+                                pay_address.text = ''
+                                pay_address.text = Clipboard.paste()
+                        Button:
+                            size_hint_x: 0.15
+                            on_press: 
+                                app.root.ids.main_sm.current = 'ScanScreen'
+                                app.root.ids.main_sm.ids.Scan_Screen.ids.zbarcam.start()
+                            RelativeLayout:
+                                pos: self.parent.pos
+                                size: self.parent.size
+                                
+                                Image:
+                                    source: 'camera_icon.png'
+                                    size: self.parent.size
+                                    
+                                    
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'y': 0.25}
+                        orientation: 'horizontal'
+                        
+                        Label:
+                            text: 'Amount:'
+                            size_hint_x: 0.2
+                        TextInput:
+                            id: amount
+                            size_hint_x: 0.5
+                            pos_hint: {'x': 0.2}
+                            text: 
+                            focus: False
+                            use_bubble: True
+
+                        BoxLayout:
+                            size_hint_x: 0.3
+
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'y': 0}
+                        orientation: 'horizontal'
+                    
+                        Button:
+                            text: 'Pay'
+                            on_press:
+                                root.pay_to_address()
+                            
+                        Button:
+                            text: 'Pay All'
+                            on_press:
+                                root.pay_all_to_address()
+            
+            BoxLayout:
+                size_hint: (1,0.5)
+                pos_hint: {'center_x': 0.5, 'center_y': 0.25}
+                orientation: 'horizontal'
+                RelativeLayout:
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'y': 0.75}
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_x: 0.45
+                        Label:
+                            text: 'Show QR code to Pay'
+                            size_hint_x: 0.1
+                        BoxLayout:
+                            size_hint_x: 0.45
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                        orientation: 'horizontal'
+                        
+                        Label:
+                            text: 'Amount:'
+                            size_hint_x: 0.2
+                        TextInput:
+                            size_hint_x: 0.5
+                            pos_hint: {'x': 0.2}
+                            text: 
+                            focus: False
+                            use_bubble: True
+
+                        BoxLayout:
+                            size_hint_x: 0.3
+
+                    BoxLayout:
+                        size_hint: (1,0.25)
+                        pos_hint: {'center_x': 0.5, 'y': 0}
+                        orientation: 'horizontal'
+                    
+                        Button:
+                            text: 'Authorize'
+                            
+                        Button:
+                            text: 'Authorize All'
+
+        
+
+<HistoryView>:
+
+<AddressListView>:
+
+<AddressListScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (1,0.1)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+            Button:
+                id: resync_button
+                text: 'Resync Wallet(Very Slow if there is many address)'
+                on_press: root.resync_button()
+        ScrollView:
+            scroll_type: ['bars', 'content']
+            bar_color: [.7, .7, .7, .9]
+            bar_inactive_color:  [.7, .7, .7, .2]
+            do_scroll_x: True
+            do_scroll_y: True
+            
+            
+            AddressListView:
+                id: address_list
+                height: self.minimum_height
+                size_hint_y: None
+                row_default_height: 100
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                text: 'BACK'
+                on_press: app.root.ids.main_sm.ids.Main_Screen.ids.sm.current = 'QRAddressScreen'
+            Button:
+                text: 'UPDATE LIST'
+                on_press: root.ids.address_list.update_list()
+            
+            
+
+<ScanScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            MyZBarCam:
+                id: zbarcam
+                stop: 
+                # optional, by default checks all types
+                code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
+            Label:
+                id: qrcontent
+                size_hint: None, None
+                size: self.texture_size[0], 50
+                text: ', '.join([str(symbol.data) for symbol in zbarcam.symbols])
+                on_text: root.scan_fun(self.text)
+        BoxLayout:
+            size_hint: (0.2,0.1)
+            pos_hint: {'x':0.4, 'y': 0}
+            Button:
+                text: 'stop camera and back'
+                on_press:
+                    root.ids.zbarcam.stop()
+                    app.root.ids.main_sm.current = 'MainScreen'
+                    
+
+
+<RV>:
+    viewclass: 'Label'
+    scroll_type: ['bars', 'content']
+    bar_color: [.7, .7, .7, .9]
+    bar_inactive_color:  [.7, .7, .7, .2]
+    do_scroll_x: True
+    do_scroll_y: True
+    Layout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        
+        orientation: 'vertical'
+
+
+
+<MyPopup@Popup>:
+    auto_dismiss: True
+    size_hint: (0.25,0.1)
+    pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+    title: 'copied!'
+    
+        
